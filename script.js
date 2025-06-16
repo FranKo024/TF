@@ -348,19 +348,6 @@ document.addEventListener('DOMContentLoaded', function() {
         ];
         
         let red = 0, green = 0, blue = 0;
-        let minVal = Infinity;
-        let maxVal = -Infinity;
-        
-        for (let ky = -1; ky <= 1; ky++) {
-            for (let kx = -1; kx <= 1; kx++) {
-                const pos = ((y + ky) * width + (x + kx)) * 4;
-                const weight = kernel[ky + 1][kx + 1];
-                
-                const val = (input[pos] + input[pos + 1] + input[pos + 2]) / 3 * weight;
-                minVal = Math.min(minVal, val);
-                maxVal = Math.max(maxVal, val);
-            }
-        }
         
         for (let ky = -1; ky <= 1; ky++) {
             for (let kx = -1; kx <= 1; kx++) {
@@ -373,11 +360,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         
-        const range = maxVal - minVal;
-        if (range === 0) range = 1;
-        
         const normalize = (val) => {
-            return Math.min(255, Math.max(0, ((val - minVal) / range) * 255));
+            return Math.min(255, Math.max(0, val + 128));
         };
         
         output[pixelPos] = normalize(red);
@@ -419,7 +403,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         const magnitude = Math.sqrt(gx * gx + gy * gy);
-        const normalizedMagnitude = Math.min(255, Math.max(0, magnitude * 2));
+        const normalizedMagnitude = Math.min(255, Math.max(0, magnitude * 4));
         
         output[pixelPos] = normalizedMagnitude;
         output[pixelPos + 1] = normalizedMagnitude;
