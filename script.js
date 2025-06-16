@@ -272,32 +272,71 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Filtro de Mediana
     function applyMedianFilter(x, y, width, height, input, output, pixelPos, kernelRadius) {
-        const redValues = [];
-        const greenValues = [];
-        const blueValues = [];
+        // Pre-allocate arrays once
+        const values = new Array((2 * kernelRadius + 1) * (2 * kernelRadius + 1));
+        const kernelSize = values.length;
         
+        // Function to find median without full sorting
+        function findMedian(arr, len) {
+            const mid = Math.floor(len / 2);
+            let left = 0;
+            let right = len - 1;
+            
+            while (left < right) {
+                const pivot = arr[Math.floor((left + right) / 2)];
+                let i = left - 1;
+                let j = right + 1;
+                
+                while (true) {
+                    do i++; while (arr[i] < pivot);
+                    do j--; while (arr[j] > pivot);
+                    if (i >= j) break;
+                    [arr[i], arr[j]] = [arr[j], arr[i]];
+                }
+                
+                if (j < mid) left = j + 1;
+                else right = j;
+            }
+            
+            return arr[mid];
+        }
+        
+        // Collect values for each channel
+        let idx = 0;
         for (let ky = -kernelRadius; ky <= kernelRadius; ky++) {
             for (let kx = -kernelRadius; kx <= kernelRadius; kx++) {
                 const px = Math.min(width - 1, Math.max(0, x + kx));
                 const py = Math.min(height - 1, Math.max(0, y + ky));
                 const pos = (py * width + px) * 4;
-                
-                redValues.push(input[pos]);
-                greenValues.push(input[pos + 1]);
-                blueValues.push(input[pos + 2]);
+                values[idx++] = input[pos]; // Red
             }
         }
+        output[pixelPos] = findMedian(values, kernelSize);
         
-        // Ordenar y obtener el valor de la mediana
-        redValues.sort((a, b) => a - b);
-        greenValues.sort((a, b) => a - b);
-        blueValues.sort((a, b) => a - b);
+        // Green channel
+        idx = 0;
+        for (let ky = -kernelRadius; ky <= kernelRadius; ky++) {
+            for (let kx = -kernelRadius; kx <= kernelRadius; kx++) {
+                const px = Math.min(width - 1, Math.max(0, x + kx));
+                const py = Math.min(height - 1, Math.max(0, y + ky));
+                const pos = (py * width + px) * 4;
+                values[idx++] = input[pos + 1]; // Green
+            }
+        }
+        output[pixelPos + 1] = findMedian(values, kernelSize);
         
-        const medianIndex = Math.floor(redValues.length / 2);
+        // Blue channel
+        idx = 0;
+        for (let ky = -kernelRadius; ky <= kernelRadius; ky++) {
+            for (let kx = -kernelRadius; kx <= kernelRadius; kx++) {
+                const px = Math.min(width - 1, Math.max(0, x + kx));
+                const py = Math.min(height - 1, Math.max(0, y + ky));
+                const pos = (py * width + px) * 4;
+                values[idx++] = input[pos + 2]; // Blue
+            }
+        }
+        output[pixelPos + 2] = findMedian(values, kernelSize);
         
-        output[pixelPos] = redValues[medianIndex];
-        output[pixelPos + 1] = greenValues[medianIndex];
-        output[pixelPos + 2] = blueValues[medianIndex];
         output[pixelPos + 3] = 255; // Alpha
     }
     
@@ -343,7 +382,22 @@ document.addEventListener('DOMContentLoaded', function() {
         ];
         
         let red = 0, green = 0, blue = 0;
+        let minVal = Infinity;
+        let maxVal = -Infinity;
         
+        // First pass: calculate min and max for normalization
+        for (let ky = -1; ky <= 1; ky++) {
+            for (let kx = -1; kx <= 1; kx++) {
+                const pos = ((y + ky) * width + (x + kx)) * 4;
+                const weight = kernel[ky + 1][kx + 1];
+                
+                const val = (input[pos] + input[pos + 1] + input[pos + 2]) / 3 * weight;
+                minVal = Math.min(minVal, val);
+                maxVal = Math.max(maxVal, val);
+            }
+        }
+        
+        // Second pass: apply filter with normalization
         for (let ky = -1; ky <= 1; ky++) {
             for (let kx = -1; kx <= 1; kx++) {
                 const pos = ((y + ky) * width + (x + kx)) * 4;
@@ -355,10 +409,17 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         
-        // Asegurar que los valores estén en el rango 0-255
-        output[pixelPos] = Math.min(255, Math.max(0, red));
-        output[pixelPos + 1] = Math.min(255, Math.max(0, green));
-        output[pixelPos + 2] = Math.min(255, Math.max(0, blue));
+        // Normalize values to 0-255 range
+        const range = maxVal - minVal;
+        if (range === 0) range = 1; // Prevent division by zero
+        
+        const normalize = (val) => {
+            return Math.min(255, Math.max(0, ((val - minVal) / range) * 255));
+        };
+        
+        output[pixelPos] = normalize(red);
+        output[pixelPos + 1] = normalize(green);
+        output[pixelPos + 2] = normalize(blue);
         output[pixelPos + 3] = 255; // Alpha
     }
     
@@ -387,36 +448,40 @@ document.addEventListener('DOMContentLoaded', function() {
         
         let redX = 0, greenX = 0, blueX = 0;
         let redY = 0, greenY = 0, blueY = 0;
+        let minMagnitude = Infinity;
+        let maxMagnitude = -Infinity;
         
+        // First pass: calculate gradients and find min/max magnitudes
         for (let ky = -1; ky <= 1; ky++) {
             for (let kx = -1; kx <= 1; kx++) {
                 const pos = ((y + ky) * width + (x + kx)) * 4;
                 const weightX = kernelX[ky + 1][kx + 1];
                 const weightY = kernelY[ky + 1][kx + 1];
                 
-                // Componente X
-                redX += input[pos] * weightX;
-                greenX += input[pos + 1] * weightX;
-                blueX += input[pos + 2] * weightX;
+                // Get grayscale value
+                const gray = (input[pos] + input[pos + 1] + input[pos + 2]) / 3;
                 
-                // Componente Y
-                redY += input[pos] * weightY;
-                greenY += input[pos + 1] * weightY;
-                blueY += input[pos + 2] * weightY;
+                // Calculate gradients
+                redX += gray * weightX;
+                redY += gray * weightY;
             }
         }
         
-        // Calcular la magnitud del gradiente
-        const red = Math.sqrt(redX * redX + redY * redY);
-        const green = Math.sqrt(greenX * greenX + greenY * greenY);
-        const blue = Math.sqrt(blueX * blueX + blueY * blueY);
+        // Calculate magnitude for this pixel
+        const magnitude = Math.sqrt(redX * redX + redY * redY);
+        minMagnitude = Math.min(minMagnitude, magnitude);
+        maxMagnitude = Math.max(maxMagnitude, magnitude);
         
-        // Normalizar y asignar (Sobel suele mostrarse en escala de grises)
-        const magnitude = Math.min(255, Math.sqrt(red * red + green * green + blue * blue));
+        // Normalize magnitude to 0-255 range
+        const range = maxMagnitude - minMagnitude;
+        if (range === 0) range = 1; // Prevent division by zero
         
-        output[pixelPos] = magnitude;
-        output[pixelPos + 1] = magnitude;
-        output[pixelPos + 2] = magnitude;
+        const normalizedMagnitude = Math.min(255, Math.max(0, ((magnitude - minMagnitude) / range) * 255));
+        
+        // Apply normalized magnitude to all channels
+        output[pixelPos] = normalizedMagnitude;
+        output[pixelPos + 1] = normalizedMagnitude;
+        output[pixelPos + 2] = normalizedMagnitude;
         output[pixelPos + 3] = 255; // Alpha
     }
     
