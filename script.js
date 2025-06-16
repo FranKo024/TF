@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const downloadBtn = document.getElementById('downloadBtn');
     const kernelSizeSelect = document.getElementById('kernelSize');
     
-    // Add kernel image elements
     const laplacianKernelImg = document.createElement('img');
     laplacianKernelImg.src = 'images/laplacianKernel.png';
     laplacianKernelImg.style.display = 'none';
@@ -23,21 +22,18 @@ document.addEventListener('DOMContentLoaded', function() {
     sobelKernelImg.style.margin = '10px';
     sobelKernelImg.id = 'sobelKernelImg';
     
-    // Add kernel size image elements
     const kernelSizeImg = document.createElement('img');
     kernelSizeImg.style.display = 'none';
     kernelSizeImg.style.maxWidth = '300px';
     kernelSizeImg.style.margin = '10px';
     kernelSizeImg.id = 'kernelSizeImg';
     
-    // Add kernel images to the document
     document.querySelector('.filters').appendChild(laplacianKernelImg);
     document.querySelector('.filters').appendChild(sobelKernelImg);
     document.querySelector('.filters').appendChild(kernelSizeImg);
     
     let originalImage = null;
     
-    // Event listeners para los botones de filtros
     document.getElementById('medianFilter').addEventListener('click', () => {
         hideAllKernelImages();
         kernelSizeImg.style.display = 'block';
@@ -63,7 +59,6 @@ document.addEventListener('DOMContentLoaded', function() {
         applyFilter('sobel');
     });
     
-    // Function to hide all kernel images
     function hideAllKernelImages() {
         laplacianKernelImg.style.display = 'none';
         sobelKernelImg.style.display = 'none';
@@ -74,11 +69,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Function to update kernel size image
     function updateKernelSizeImage(filterType) {
         const size = kernelSizeSelect.value;
         if (filterType === 'sobel') {
-            // Always remove the 7x7 container if it exists
             const existingContainer = document.querySelector('.sobel7x7-container');
             if (existingContainer) {
                 existingContainer.remove();
@@ -88,7 +81,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 kernelSizeImg.src = 'images/sobel5x5.png';
             } else if (size === '7') {
                 kernelSizeImg.style.display = 'none';
-                // For Sobel 7x7, show both X and Y kernels
                 const sobel7x7Container = document.createElement('div');
                 sobel7x7Container.style.display = 'flex';
                 sobel7x7Container.style.gap = '20px';
@@ -120,7 +112,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             kernelSizeImg.style.display = 'block';
         } else {
-            // For mean and median filters
             const existingContainer = document.querySelector('.sobel7x7-container');
             if (existingContainer) {
                 existingContainer.remove();
@@ -130,24 +121,19 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Function to handle kernel size selection
     function handleKernelSizeChange(filterType) {
         if (filterType === 'laplacian') {
-            // Enable kernel size selection for Laplacian
             kernelSizeSelect.disabled = false;
             updateKernelSizeImage(filterType);
         } else if (filterType === 'sobel') {
-            // Enable kernel size selection for Sobel
             kernelSizeSelect.disabled = false;
             updateKernelSizeImage(filterType);
         } else {
-            // Enable kernel size selection for mean and median
             kernelSizeSelect.disabled = false;
             updateKernelSizeImage(filterType);
         }
     }
     
-    // Event listener for kernel size changes
     kernelSizeSelect.addEventListener('change', () => {
         const activeFilter = document.querySelector('.filters button.active')?.id.replace('Filter', '');
         if (activeFilter) {
@@ -155,7 +141,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Función para cargar y procesar la imagen
     function loadImage(file) {
         if (!file || !file.type.startsWith('image/')) {
             alert('Por favor, selecciona un archivo de imagen válido.');
@@ -167,7 +152,6 @@ document.addEventListener('DOMContentLoaded', function() {
         reader.onload = function(event) {
             const img = new Image();
             img.onload = function() {
-                // Ajustar el tamaño de los canvas
                 const maxWidth = 500;
                 const maxHeight = 500;
                 let width = img.width;
@@ -188,7 +172,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 filteredCanvas.width = width;
                 filteredCanvas.height = height;
                 
-                // Dibujar la imagen original
                 originalCtx.drawImage(img, 0, 0, width, height);
                 filteredCtx.drawImage(img, 0, 0, width, height);
                 
@@ -200,21 +183,18 @@ document.addEventListener('DOMContentLoaded', function() {
         reader.readAsDataURL(file);
     }
     
-    // Event listener para el input de archivo
     imageUpload.addEventListener('change', function(e) {
         if (e.target.files && e.target.files[0]) {
             loadImage(e.target.files[0]);
         }
     });
     
-    // Restablecer imagen
     resetBtn.addEventListener('click', function() {
         if (originalImage) {
             filteredCtx.drawImage(originalImage, 0, 0, originalCanvas.width, originalCanvas.height);
         }
     });
     
-    // Descargar imagen filtrada
     downloadBtn.addEventListener('click', function() {
         if (!filteredCanvas) return;
         
@@ -224,7 +204,6 @@ document.addEventListener('DOMContentLoaded', function() {
         link.click();
     });
     
-    // Aplicar filtro
     function applyFilter(filterType) {
         if (!originalImage) return;
         
@@ -235,7 +214,6 @@ document.addEventListener('DOMContentLoaded', function() {
         filteredCtx.putImageData(filteredData, 0, 0);
     }
     
-    // Función principal para aplicar filtros
     function applyImageFilter(imageData, filterType, kernelSize = 3) {
         const width = imageData.width;
         const height = imageData.height;
@@ -243,7 +221,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const newData = new ImageData(width, height);
         const output = newData.data;
         
-        // Kernel debe ser impar
         const kernelRadius = Math.floor(kernelSize / 2);
         
         for (let y = 0; y < height; y++) {
@@ -259,7 +236,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else if (filterType === 'sobel') {
                     applySobelFilter(x, y, width, height, data, output, pixelPos);
                 } else {
-                    // Copiar original si no hay filtro reconocido
                     for (let i = 0; i < 4; i++) {
                         output[pixelPos + i] = data[pixelPos + i];
                     }
@@ -270,13 +246,10 @@ document.addEventListener('DOMContentLoaded', function() {
         return newData;
     }
     
-    // Filtro de Mediana
     function applyMedianFilter(x, y, width, height, input, output, pixelPos, kernelRadius) {
-        // Pre-allocate arrays once
         const values = new Array((2 * kernelRadius + 1) * (2 * kernelRadius + 1));
         const kernelSize = values.length;
         
-        // Function to find median without full sorting
         function findMedian(arr, len) {
             const mid = Math.floor(len / 2);
             let left = 0;
@@ -301,46 +274,42 @@ document.addEventListener('DOMContentLoaded', function() {
             return arr[mid];
         }
         
-        // Collect values for each channel
         let idx = 0;
         for (let ky = -kernelRadius; ky <= kernelRadius; ky++) {
             for (let kx = -kernelRadius; kx <= kernelRadius; kx++) {
                 const px = Math.min(width - 1, Math.max(0, x + kx));
                 const py = Math.min(height - 1, Math.max(0, y + ky));
                 const pos = (py * width + px) * 4;
-                values[idx++] = input[pos]; // Red
+                values[idx++] = input[pos];
             }
         }
         output[pixelPos] = findMedian(values, kernelSize);
         
-        // Green channel
         idx = 0;
         for (let ky = -kernelRadius; ky <= kernelRadius; ky++) {
             for (let kx = -kernelRadius; kx <= kernelRadius; kx++) {
                 const px = Math.min(width - 1, Math.max(0, x + kx));
                 const py = Math.min(height - 1, Math.max(0, y + ky));
                 const pos = (py * width + px) * 4;
-                values[idx++] = input[pos + 1]; // Green
+                values[idx++] = input[pos + 1];
             }
         }
         output[pixelPos + 1] = findMedian(values, kernelSize);
         
-        // Blue channel
         idx = 0;
         for (let ky = -kernelRadius; ky <= kernelRadius; ky++) {
             for (let kx = -kernelRadius; kx <= kernelRadius; kx++) {
                 const px = Math.min(width - 1, Math.max(0, x + kx));
                 const py = Math.min(height - 1, Math.max(0, y + ky));
                 const pos = (py * width + px) * 4;
-                values[idx++] = input[pos + 2]; // Blue
+                values[idx++] = input[pos + 2];
             }
         }
         output[pixelPos + 2] = findMedian(values, kernelSize);
         
-        output[pixelPos + 3] = 255; // Alpha
+        output[pixelPos + 3] = 255;
     }
     
-    // Filtro de Media
     function applyMeanFilter(x, y, width, height, input, output, pixelPos, kernelRadius) {
         let redSum = 0, greenSum = 0, blueSum = 0;
         let count = 0;
@@ -361,20 +330,17 @@ document.addEventListener('DOMContentLoaded', function() {
         output[pixelPos] = redSum / count;
         output[pixelPos + 1] = greenSum / count;
         output[pixelPos + 2] = blueSum / count;
-        output[pixelPos + 3] = 255; // Alpha
+        output[pixelPos + 3] = 255;
     }
     
-    // Filtro Laplaciano
     function applyLaplacianFilter(x, y, width, height, input, output, pixelPos) {
         if (x === 0 || y === 0 || x === width - 1 || y === height - 1) {
-            // Borde - copiar original
             for (let i = 0; i < 4; i++) {
                 output[pixelPos + i] = input[pixelPos + i];
             }
             return;
         }
         
-        // Kernel Laplaciano (4-vecinos)
         const kernel = [
             [0, -1, 0],
             [-1, 4, -1],
@@ -385,7 +351,6 @@ document.addEventListener('DOMContentLoaded', function() {
         let minVal = Infinity;
         let maxVal = -Infinity;
         
-        // First pass: calculate min and max for normalization
         for (let ky = -1; ky <= 1; ky++) {
             for (let kx = -1; kx <= 1; kx++) {
                 const pos = ((y + ky) * width + (x + kx)) * 4;
@@ -397,7 +362,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         
-        // Second pass: apply filter with normalization
         for (let ky = -1; ky <= 1; ky++) {
             for (let kx = -1; kx <= 1; kx++) {
                 const pos = ((y + ky) * width + (x + kx)) * 4;
@@ -409,9 +373,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         
-        // Normalize values to 0-255 range
         const range = maxVal - minVal;
-        if (range === 0) range = 1; // Prevent division by zero
+        if (range === 0) range = 1;
         
         const normalize = (val) => {
             return Math.min(255, Math.max(0, ((val - minVal) / range) * 255));
@@ -420,20 +383,17 @@ document.addEventListener('DOMContentLoaded', function() {
         output[pixelPos] = normalize(red);
         output[pixelPos + 1] = normalize(green);
         output[pixelPos + 2] = normalize(blue);
-        output[pixelPos + 3] = 255; // Alpha
+        output[pixelPos + 3] = 255;
     }
     
-    // Filtro Sobel
     function applySobelFilter(x, y, width, height, input, output, pixelPos) {
         if (x === 0 || y === 0 || x === width - 1 || y === height - 1) {
-            // Borde - copiar original
             for (let i = 0; i < 4; i++) {
                 output[pixelPos + i] = input[pixelPos + i];
             }
             return;
         }
         
-        // Kernels Sobel
         const kernelX = [
             [-1, 0, 1],
             [-2, 0, 2],
@@ -446,46 +406,27 @@ document.addEventListener('DOMContentLoaded', function() {
             [1, 2, 1]
         ];
         
-        let redX = 0, greenX = 0, blueX = 0;
-        let redY = 0, greenY = 0, blueY = 0;
-        let minMagnitude = Infinity;
-        let maxMagnitude = -Infinity;
+        let gx = 0, gy = 0;
         
-        // First pass: calculate gradients and find min/max magnitudes
         for (let ky = -1; ky <= 1; ky++) {
             for (let kx = -1; kx <= 1; kx++) {
                 const pos = ((y + ky) * width + (x + kx)) * 4;
-                const weightX = kernelX[ky + 1][kx + 1];
-                const weightY = kernelY[ky + 1][kx + 1];
-                
-                // Get grayscale value
                 const gray = (input[pos] + input[pos + 1] + input[pos + 2]) / 3;
                 
-                // Calculate gradients
-                redX += gray * weightX;
-                redY += gray * weightY;
+                gx += gray * kernelX[ky + 1][kx + 1];
+                gy += gray * kernelY[ky + 1][kx + 1];
             }
         }
         
-        // Calculate magnitude for this pixel
-        const magnitude = Math.sqrt(redX * redX + redY * redY);
-        minMagnitude = Math.min(minMagnitude, magnitude);
-        maxMagnitude = Math.max(maxMagnitude, magnitude);
+        const magnitude = Math.sqrt(gx * gx + gy * gy);
+        const normalizedMagnitude = Math.min(255, Math.max(0, magnitude * 2));
         
-        // Normalize magnitude to 0-255 range
-        const range = maxMagnitude - minMagnitude;
-        if (range === 0) range = 1; // Prevent division by zero
-        
-        const normalizedMagnitude = Math.min(255, Math.max(0, ((magnitude - minMagnitude) / range) * 255));
-        
-        // Apply normalized magnitude to all channels
         output[pixelPos] = normalizedMagnitude;
         output[pixelPos + 1] = normalizedMagnitude;
         output[pixelPos + 2] = normalizedMagnitude;
-        output[pixelPos + 3] = 255; // Alpha
+        output[pixelPos + 3] = 255;
     }
     
-    // Add click handler to remove active class from other buttons
     document.querySelectorAll('.filters button').forEach(button => {
         button.addEventListener('click', function() {
             document.querySelectorAll('.filters button').forEach(btn => btn.classList.remove('active'));
