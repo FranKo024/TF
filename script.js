@@ -1,90 +1,90 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const imageUpload = document.getElementById('imageUpload');
-    const originalCanvas = document.getElementById('originalCanvas');
-    const filteredCanvas = document.getElementById('filteredCanvas');
-    const originalCtx = originalCanvas.getContext('2d');
-    const filteredCtx = filteredCanvas.getContext('2d');
-    const resetBtn = document.getElementById('resetBtn');
-    const downloadBtn = document.getElementById('downloadBtn');
-    const kernelSizeSelect = document.getElementById('kernelSize');
+    const subidaImagen = document.getElementById('subidaImagen');
+    const lienzoOriginal = document.getElementById('lienzoOriginal');
+    const lienzoFiltrado = document.getElementById('lienzoFiltrado');
+    const contextoOriginal = lienzoOriginal.getContext('2d');
+    const contextoFiltrado = lienzoFiltrado.getContext('2d');
+    const botonReiniciar = document.getElementById('botonReiniciar');
+    const botonDescargar = document.getElementById('botonDescargar');
+    const selectorTamanoKernel = document.getElementById('selectorTamanoKernel');
     
-    const laplacianKernelImg = document.createElement('img');
-    laplacianKernelImg.src = 'images/laplacianKernel.png';
-    laplacianKernelImg.style.display = 'none';
-    laplacianKernelImg.style.maxWidth = '200px';
-    laplacianKernelImg.style.margin = '10px';
-    laplacianKernelImg.id = 'laplacianKernelImg';
+    const imagenKernelLaplaciano = document.createElement('img');
+    imagenKernelLaplaciano.src = 'images/laplacianKernel.png';
+    imagenKernelLaplaciano.style.display = 'none';
+    imagenKernelLaplaciano.style.maxWidth = '200px';
+    imagenKernelLaplaciano.style.margin = '10px';
+    imagenKernelLaplaciano.id = 'laplacianKernelImg';
     
-    const sobelKernelImg = document.createElement('img');
-    sobelKernelImg.src = 'images/sobelKernel.png';
-    sobelKernelImg.style.display = 'none';
-    sobelKernelImg.style.maxWidth = '400px';
-    sobelKernelImg.style.margin = '10px';
-    sobelKernelImg.id = 'sobelKernelImg';
+    const imagenKernelSobel = document.createElement('img');
+    imagenKernelSobel.src = 'images/sobelKernel.png';
+    imagenKernelSobel.style.display = 'none';
+    imagenKernelSobel.style.maxWidth = '400px';
+    imagenKernelSobel.style.margin = '10px';
+    imagenKernelSobel.id = 'sobelKernelImg';
     
-    const kernelSizeImg = document.createElement('img');
-    kernelSizeImg.style.display = 'none';
-    kernelSizeImg.style.maxWidth = '300px';
-    kernelSizeImg.style.margin = '10px';
-    kernelSizeImg.id = 'kernelSizeImg';
+    const imagenTamanoKernel = document.createElement('img');
+    imagenTamanoKernel.style.display = 'none';
+    imagenTamanoKernel.style.maxWidth = '300px';
+    imagenTamanoKernel.style.margin = '10px';
+    imagenTamanoKernel.id = 'kernelSizeImg';
     
-    document.querySelector('.filters').appendChild(laplacianKernelImg);
-    document.querySelector('.filters').appendChild(sobelKernelImg);
-    document.querySelector('.filters').appendChild(kernelSizeImg);
+    document.querySelector('.filtros').appendChild(imagenKernelLaplaciano);
+    document.querySelector('.filtros').appendChild(imagenKernelSobel);
+    document.querySelector('.filtros').appendChild(imagenTamanoKernel);
     
-    let originalImage = null;
+    let imagenOriginal = null;
     
-    document.getElementById('medianFilter').addEventListener('click', () => {
-        hideAllKernelImages();
-        kernelSizeImg.style.display = 'block';
-        updateKernelSizeImage('median');
-        applyFilter('median');
+    document.getElementById('filtroMediana').addEventListener('click', () => {
+        ocultarImagenesKernel();
+        imagenTamanoKernel.style.display = 'block';
+        actualizarImagenTamanoKernel('mediana');
+        aplicarFiltro('mediana');
     });
-    document.getElementById('meanFilter').addEventListener('click', () => {
-        hideAllKernelImages();
-        kernelSizeImg.style.display = 'block';
-        updateKernelSizeImage('mean');
-        applyFilter('mean');
+    document.getElementById('filtroMedia').addEventListener('click', () => {
+        ocultarImagenesKernel();
+        imagenTamanoKernel.style.display = 'block';
+        actualizarImagenTamanoKernel('media');
+        aplicarFiltro('media');
     });
-    document.getElementById('laplacianFilter').addEventListener('click', () => {
-        hideAllKernelImages();
-        kernelSizeImg.style.display = 'block';
-        updateKernelSizeImage('laplacian');
-        applyFilter('laplacian');
+    document.getElementById('filtroLaplaciano').addEventListener('click', () => {
+        ocultarImagenesKernel();
+        imagenTamanoKernel.style.display = 'block';
+        actualizarImagenTamanoKernel('laplaciano');
+        aplicarFiltro('laplaciano');
     });
-    document.getElementById('sobelFilter').addEventListener('click', () => {
-        hideAllKernelImages();
-        kernelSizeImg.style.display = 'block';
-        updateKernelSizeImage('sobel');
-        applyFilter('sobel');
+    document.getElementById('filtroSobel').addEventListener('click', () => {
+        ocultarImagenesKernel();
+        imagenTamanoKernel.style.display = 'block';
+        actualizarImagenTamanoKernel('sobel');
+        aplicarFiltro('sobel');
     });
     
-    function hideAllKernelImages() {
-        laplacianKernelImg.style.display = 'none';
-        sobelKernelImg.style.display = 'none';
-        kernelSizeImg.style.display = 'none';
-        const existingContainer = document.querySelector('.sobel7x7-container');
-        if (existingContainer) {
-            existingContainer.remove();
+    function ocultarImagenesKernel() {
+        imagenKernelLaplaciano.style.display = 'none';
+        imagenKernelSobel.style.display = 'none';
+        imagenTamanoKernel.style.display = 'none';
+        const contenedorExistente = document.querySelector('.sobel7x7-container');
+        if (contenedorExistente) {
+            contenedorExistente.remove();
         }
     }
     
-    function updateKernelSizeImage(filterType) {
-        const size = kernelSizeSelect.value;
-        if (filterType === 'sobel') {
-            const existingContainer = document.querySelector('.sobel7x7-container');
-            if (existingContainer) {
-                existingContainer.remove();
+    function actualizarImagenTamanoKernel(tipoFiltro) {
+        const tamano = selectorTamanoKernel.value;
+        if (tipoFiltro === 'sobel') {
+            const contenedorExistente = document.querySelector('.sobel7x7-container');
+            if (contenedorExistente) {
+                contenedorExistente.remove();
             }
-            if (size === '5') {
-                kernelSizeImg.style.display = 'block';
-                kernelSizeImg.src = 'images/sobel5x5.png';
-            } else if (size === '7') {
-                kernelSizeImg.style.display = 'none';
-                const sobel7x7Container = document.createElement('div');
-                sobel7x7Container.style.display = 'flex';
-                sobel7x7Container.style.gap = '20px';
-                sobel7x7Container.style.justifyContent = 'center';
+            if (tamano === '5') {
+                imagenTamanoKernel.style.display = 'block';
+                imagenTamanoKernel.src = 'images/sobel5x5.png';
+            } else if (tamano === '7') {
+                imagenTamanoKernel.style.display = 'none';
+                const contenedorSobel7x7 = document.createElement('div');
+                contenedorSobel7x7.style.display = 'flex';
+                contenedorSobel7x7.style.gap = '20px';
+                contenedorSobel7x7.style.justifyContent = 'center';
                 
                 const sobel7x7X = document.createElement('img');
                 sobel7x7X.src = 'images/sobel7x7_x.png';
@@ -94,249 +94,249 @@ document.addEventListener('DOMContentLoaded', function() {
                 sobel7x7Y.src = 'images/sobel7x7_y.png';
                 sobel7x7Y.style.maxWidth = '300px';
                 
-                sobel7x7Container.className = 'sobel7x7-container';
-                sobel7x7Container.appendChild(sobel7x7X);
-                sobel7x7Container.appendChild(sobel7x7Y);
-                document.querySelector('.filters').appendChild(sobel7x7Container);
+                contenedorSobel7x7.className = 'sobel7x7-container';
+                contenedorSobel7x7.appendChild(sobel7x7X);
+                contenedorSobel7x7.appendChild(sobel7x7Y);
+                document.querySelector('.filtros').appendChild(contenedorSobel7x7);
             } else {
-                kernelSizeImg.style.display = 'block';
-                kernelSizeImg.src = 'images/sobelKernel.png';
+                imagenTamanoKernel.style.display = 'block';
+                imagenTamanoKernel.src = 'images/sobelKernel.png';
             }
-        } else if (filterType === 'laplacian') {
-            if (size === '5') {
-                kernelSizeImg.src = 'images/laplacian5x5.png';
-            } else if (size === '7') {
-                kernelSizeImg.src = 'images/laplacian7x7.png';
+        } else if (tipoFiltro === 'laplaciano') {
+            if (tamano === '5') {
+                imagenTamanoKernel.src = 'images/laplacian5x5.png';
+            } else if (tamano === '7') {
+                imagenTamanoKernel.src = 'images/laplacian7x7.png';
             } else {
-                kernelSizeImg.src = 'images/laplacianKernel.png';
+                imagenTamanoKernel.src = 'images/laplacianKernel.png';
             }
-            kernelSizeImg.style.display = 'block';
+            imagenTamanoKernel.style.display = 'block';
         } else {
-            const existingContainer = document.querySelector('.sobel7x7-container');
-            if (existingContainer) {
-                existingContainer.remove();
+            const contenedorExistente = document.querySelector('.sobel7x7-container');
+            if (contenedorExistente) {
+                contenedorExistente.remove();
             }
-            kernelSizeImg.style.display = 'block';
-            kernelSizeImg.src = `images/${size}x${size}kernel.png`;
+            imagenTamanoKernel.style.display = 'block';
+            imagenTamanoKernel.src = `images/${tamano}x${tamano}kernel.png`;
         }
     }
     
-    function handleKernelSizeChange(filterType) {
-        if (filterType === 'laplacian') {
-            kernelSizeSelect.disabled = false;
-            updateKernelSizeImage(filterType);
-        } else if (filterType === 'sobel') {
-            kernelSizeSelect.disabled = false;
-            updateKernelSizeImage(filterType);
+    function manejarCambioTamanoKernel(tipoFiltro) {
+        if (tipoFiltro === 'laplaciano') {
+            selectorTamanoKernel.disabled = false;
+            actualizarImagenTamanoKernel(tipoFiltro);
+        } else if (tipoFiltro === 'sobel') {
+            selectorTamanoKernel.disabled = false;
+            actualizarImagenTamanoKernel(tipoFiltro);
         } else {
-            kernelSizeSelect.disabled = false;
-            updateKernelSizeImage(filterType);
+            selectorTamanoKernel.disabled = false;
+            actualizarImagenTamanoKernel(tipoFiltro);
         }
     }
     
-    kernelSizeSelect.addEventListener('change', () => {
-        const activeFilter = document.querySelector('.filters button.active')?.id.replace('Filter', '');
-        if (activeFilter) {
-            updateKernelSizeImage(activeFilter);
+    selectorTamanoKernel.addEventListener('change', () => {
+        const filtroActivo = document.querySelector('.filtros button.active')?.id.replace('filtro', '').toLowerCase();
+        if (filtroActivo) {
+            actualizarImagenTamanoKernel(filtroActivo);
         }
     });
     
-    function loadImage(file) {
-        if (!file || !file.type.startsWith('image/')) {
+    function cargarImagen(archivo) {
+        if (!archivo || !archivo.type.startsWith('image/')) {
             alert('Por favor, selecciona un archivo de imagen válido.');
             return;
         }
 
-        const reader = new FileReader();
+        const lector = new FileReader();
         
-        reader.onload = function(event) {
+        lector.onload = function(evento) {
             const img = new Image();
             img.onload = function() {
-                const maxWidth = 500;
-                const maxHeight = 500;
-                let width = img.width;
-                let height = img.height;
+                const anchoMaximo = 500;
+                const altoMaximo = 500;
+                let ancho = img.width;
+                let alto = img.height;
                 
-                if (width > maxWidth) {
-                    height = (maxWidth / width) * height;
-                    width = maxWidth;
+                if (ancho > anchoMaximo) {
+                    alto = (anchoMaximo / ancho) * alto;
+                    ancho = anchoMaximo;
                 }
                 
-                if (height > maxHeight) {
-                    width = (maxHeight / height) * width;
-                    height = maxHeight;
+                if (alto > altoMaximo) {
+                    ancho = (altoMaximo / alto) * ancho;
+                    alto = altoMaximo;
                 }
                 
-                originalCanvas.width = width;
-                originalCanvas.height = height;
-                filteredCanvas.width = width;
-                filteredCanvas.height = height;
+                lienzoOriginal.width = ancho;
+                lienzoOriginal.height = alto;
+                lienzoFiltrado.width = ancho;
+                lienzoFiltrado.height = alto;
                 
-                originalCtx.drawImage(img, 0, 0, width, height);
-                filteredCtx.drawImage(img, 0, 0, width, height);
+                contextoOriginal.drawImage(img, 0, 0, ancho, alto);
+                contextoFiltrado.drawImage(img, 0, 0, ancho, alto);
                 
-                originalImage = img;
-                downloadBtn.disabled = false;
+                imagenOriginal = img;
+                botonDescargar.disabled = false;
             };
-            img.src = event.target.result;
+            img.src = evento.target.result;
         };
-        reader.readAsDataURL(file);
+        lector.readAsDataURL(archivo);
     }
     
-    imageUpload.addEventListener('change', function(e) {
+    subidaImagen.addEventListener('change', function(e) {
         if (e.target.files && e.target.files[0]) {
-            loadImage(e.target.files[0]);
+            cargarImagen(e.target.files[0]);
         }
     });
     
-    resetBtn.addEventListener('click', function() {
-        if (originalImage) {
-            filteredCtx.drawImage(originalImage, 0, 0, originalCanvas.width, originalCanvas.height);
+    botonReiniciar.addEventListener('click', function() {
+        if (imagenOriginal) {
+            contextoFiltrado.drawImage(imagenOriginal, 0, 0, lienzoOriginal.width, lienzoOriginal.height);
         }
     });
     
-    downloadBtn.addEventListener('click', function() {
-        if (!filteredCanvas) return;
+    botonDescargar.addEventListener('click', function() {
+        if (!lienzoFiltrado) return;
         
-        const link = document.createElement('a');
-        link.download = 'imagen-filtrada.png';
-        link.href = filteredCanvas.toDataURL('image/png');
-        link.click();
+        const enlace = document.createElement('a');
+        enlace.download = 'imagen-filtrada.png';
+        enlace.href = lienzoFiltrado.toDataURL('image/png');
+        enlace.click();
     });
     
-    function applyFilter(filterType) {
-        if (!originalImage) return;
+    function aplicarFiltro(tipoFiltro) {
+        if (!imagenOriginal) return;
         
-        const kernelSize = parseInt(kernelSizeSelect.value);
-        const imageData = originalCtx.getImageData(0, 0, originalCanvas.width, originalCanvas.height);
-        const filteredData = applyImageFilter(imageData, filterType, kernelSize);
+        const tamanoKernel = parseInt(selectorTamanoKernel.value);
+        const datosImagen = contextoOriginal.getImageData(0, 0, lienzoOriginal.width, lienzoOriginal.height);
+        const datosFiltrados = aplicarFiltroImagen(datosImagen, tipoFiltro, tamanoKernel);
         
-        filteredCtx.putImageData(filteredData, 0, 0);
+        contextoFiltrado.putImageData(datosFiltrados, 0, 0);
     }
     
-    function applyImageFilter(imageData, filterType, kernelSize = 3) {
-        const width = imageData.width;
-        const height = imageData.height;
-        const data = imageData.data;
-        const newData = new ImageData(width, height);
-        const output = newData.data;
+    function aplicarFiltroImagen(datosImagen, tipoFiltro, tamanoKernel = 3) {
+        const ancho = datosImagen.width;
+        const alto = datosImagen.height;
+        const datos = datosImagen.data;
+        const nuevosDatos = new ImageData(ancho, alto);
+        const salida = nuevosDatos.data;
         
-        const kernelRadius = Math.floor(kernelSize / 2);
+        const radioKernel = Math.floor(tamanoKernel / 2);
         
-        for (let y = 0; y < height; y++) {
-            for (let x = 0; x < width; x++) {
-                const pixelPos = (y * width + x) * 4;
+        for (let y = 0; y < alto; y++) {
+            for (let x = 0; x < ancho; x++) {
+                const posicionPixel = (y * ancho + x) * 4;
                 
-                if (filterType === 'median') {
-                    applyMedianFilter(x, y, width, height, data, output, pixelPos, kernelRadius);
-                } else if (filterType === 'mean') {
-                    applyMeanFilter(x, y, width, height, data, output, pixelPos, kernelRadius);
-                } else if (filterType === 'laplacian') {
-                    applyLaplacianFilter(x, y, width, height, data, output, pixelPos);
-                } else if (filterType === 'sobel') {
-                    applySobelFilter(x, y, width, height, data, output, pixelPos);
+                if (tipoFiltro === 'mediana') {
+                    aplicarFiltroMediana(x, y, ancho, alto, datos, salida, posicionPixel, radioKernel);
+                } else if (tipoFiltro === 'media') {
+                    aplicarFiltroMedia(x, y, ancho, alto, datos, salida, posicionPixel, radioKernel);
+                } else if (tipoFiltro === 'laplaciano') {
+                    aplicarFiltroLaplaciano(x, y, ancho, alto, datos, salida, posicionPixel);
+                } else if (tipoFiltro === 'sobel') {
+                    aplicarFiltroSobel(x, y, ancho, alto, datos, salida, posicionPixel);
                 } else {
                     for (let i = 0; i < 4; i++) {
-                        output[pixelPos + i] = data[pixelPos + i];
+                        salida[posicionPixel + i] = datos[posicionPixel + i];
                     }
                 }
             }
         }
         
-        return newData;
+        return nuevosDatos;
     }
     
-    function applyMedianFilter(x, y, width, height, input, output, pixelPos, kernelRadius) {
-        const values = new Array((2 * kernelRadius + 1) * (2 * kernelRadius + 1));
-        const kernelSize = values.length;
+    function aplicarFiltroMediana(x, y, ancho, alto, entrada, salida, posicionPixel, radioKernel) {
+        const valores = new Array((2 * radioKernel + 1) * (2 * radioKernel + 1));
+        const tamanoKernel = valores.length;
         
-        function findMedian(arr, len) {
-            const mid = Math.floor(len / 2);
-            let left = 0;
-            let right = len - 1;
+        function encontrarMediana(arr, len) {
+            const medio = Math.floor(len / 2);
+            let izquierda = 0;
+            let derecha = len - 1;
             
-            while (left < right) {
-                const pivot = arr[Math.floor((left + right) / 2)];
-                let i = left - 1;
-                let j = right + 1;
+            while (izquierda < derecha) {
+                const pivote = arr[Math.floor((izquierda + derecha) / 2)];
+                let i = izquierda - 1;
+                let j = derecha + 1;
                 
                 while (true) {
-                    do i++; while (arr[i] < pivot);
-                    do j--; while (arr[j] > pivot);
+                    do i++; while (arr[i] < pivote);
+                    do j--; while (arr[j] > pivote);
                     if (i >= j) break;
                     [arr[i], arr[j]] = [arr[j], arr[i]];
                 }
                 
-                if (j < mid) left = j + 1;
-                else right = j;
+                if (j < medio) izquierda = j + 1;
+                else derecha = j;
             }
             
-            return arr[mid];
+            return arr[medio];
         }
         
         let idx = 0;
-        for (let ky = -kernelRadius; ky <= kernelRadius; ky++) {
-            for (let kx = -kernelRadius; kx <= kernelRadius; kx++) {
-                const px = Math.min(width - 1, Math.max(0, x + kx));
-                const py = Math.min(height - 1, Math.max(0, y + ky));
-                const pos = (py * width + px) * 4;
-                values[idx++] = input[pos];
+        for (let ky = -radioKernel; ky <= radioKernel; ky++) {
+            for (let kx = -radioKernel; kx <= radioKernel; kx++) {
+                const px = Math.min(ancho - 1, Math.max(0, x + kx));
+                const py = Math.min(alto - 1, Math.max(0, y + ky));
+                const pos = (py * ancho + px) * 4;
+                valores[idx++] = entrada[pos];
             }
         }
-        output[pixelPos] = findMedian(values, kernelSize);
+        salida[posicionPixel] = encontrarMediana(valores, tamanoKernel);
         
         idx = 0;
-        for (let ky = -kernelRadius; ky <= kernelRadius; ky++) {
-            for (let kx = -kernelRadius; kx <= kernelRadius; kx++) {
-                const px = Math.min(width - 1, Math.max(0, x + kx));
-                const py = Math.min(height - 1, Math.max(0, y + ky));
-                const pos = (py * width + px) * 4;
-                values[idx++] = input[pos + 1];
+        for (let ky = -radioKernel; ky <= radioKernel; ky++) {
+            for (let kx = -radioKernel; kx <= radioKernel; kx++) {
+                const px = Math.min(ancho - 1, Math.max(0, x + kx));
+                const py = Math.min(alto - 1, Math.max(0, y + ky));
+                const pos = (py * ancho + px) * 4;
+                valores[idx++] = entrada[pos + 1];
             }
         }
-        output[pixelPos + 1] = findMedian(values, kernelSize);
+        salida[posicionPixel + 1] = encontrarMediana(valores, tamanoKernel);
         
         idx = 0;
-        for (let ky = -kernelRadius; ky <= kernelRadius; ky++) {
-            for (let kx = -kernelRadius; kx <= kernelRadius; kx++) {
-                const px = Math.min(width - 1, Math.max(0, x + kx));
-                const py = Math.min(height - 1, Math.max(0, y + ky));
-                const pos = (py * width + px) * 4;
-                values[idx++] = input[pos + 2];
+        for (let ky = -radioKernel; ky <= radioKernel; ky++) {
+            for (let kx = -radioKernel; kx <= radioKernel; kx++) {
+                const px = Math.min(ancho - 1, Math.max(0, x + kx));
+                const py = Math.min(alto - 1, Math.max(0, y + ky));
+                const pos = (py * ancho + px) * 4;
+                valores[idx++] = entrada[pos + 2];
             }
         }
-        output[pixelPos + 2] = findMedian(values, kernelSize);
+        salida[posicionPixel + 2] = encontrarMediana(valores, tamanoKernel);
         
-        output[pixelPos + 3] = 255;
+        salida[posicionPixel + 3] = 255;
     }
     
-    function applyMeanFilter(x, y, width, height, input, output, pixelPos, kernelRadius) {
-        let redSum = 0, greenSum = 0, blueSum = 0;
-        let count = 0;
+    function aplicarFiltroMedia(x, y, ancho, alto, entrada, salida, posicionPixel, radioKernel) {
+        let sumaRojo = 0, sumaVerde = 0, sumaAzul = 0;
+        let contador = 0;
         
-        for (let ky = -kernelRadius; ky <= kernelRadius; ky++) {
-            for (let kx = -kernelRadius; kx <= kernelRadius; kx++) {
-                const px = Math.min(width - 1, Math.max(0, x + kx));
-                const py = Math.min(height - 1, Math.max(0, y + ky));
-                const pos = (py * width + px) * 4;
+        for (let ky = -radioKernel; ky <= radioKernel; ky++) {
+            for (let kx = -radioKernel; kx <= radioKernel; kx++) {
+                const px = Math.min(ancho - 1, Math.max(0, x + kx));
+                const py = Math.min(alto - 1, Math.max(0, y + ky));
+                const pos = (py * ancho + px) * 4;
                 
-                redSum += input[pos];
-                greenSum += input[pos + 1];
-                blueSum += input[pos + 2];
-                count++;
+                sumaRojo += entrada[pos];
+                sumaVerde += entrada[pos + 1];
+                sumaAzul += entrada[pos + 2];
+                contador++;
             }
         }
         
-        output[pixelPos] = redSum / count;
-        output[pixelPos + 1] = greenSum / count;
-        output[pixelPos + 2] = blueSum / count;
-        output[pixelPos + 3] = 255;
+        salida[posicionPixel] = sumaRojo / contador;
+        salida[posicionPixel + 1] = sumaVerde / contador;
+        salida[posicionPixel + 2] = sumaAzul / contador;
+        salida[posicionPixel + 3] = 255;
     }
     
-    function applyLaplacianFilter(x, y, width, height, input, output, pixelPos) {
-        if (x === 0 || y === 0 || x === width - 1 || y === height - 1) {
+    function aplicarFiltroLaplaciano(x, y, ancho, alto, entrada, salida, posicionPixel) {
+        if (x === 0 || y === 0 || x === ancho - 1 || y === alto - 1) {
             for (let i = 0; i < 4; i++) {
-                output[pixelPos + i] = input[pixelPos + i];
+                salida[posicionPixel + i] = entrada[posicionPixel + i];
             }
             return;
         }
@@ -347,33 +347,33 @@ document.addEventListener('DOMContentLoaded', function() {
             [0, -1, 0]
         ];
         
-        let red = 0, green = 0, blue = 0;
+        let rojo = 0, verde = 0, azul = 0;
         
         for (let ky = -1; ky <= 1; ky++) {
             for (let kx = -1; kx <= 1; kx++) {
-                const pos = ((y + ky) * width + (x + kx)) * 4;
-                const weight = kernel[ky + 1][kx + 1];
+                const pos = ((y + ky) * ancho + (x + kx)) * 4;
+                const peso = kernel[ky + 1][kx + 1];
                 
-                red += input[pos] * weight;
-                green += input[pos + 1] * weight;
-                blue += input[pos + 2] * weight;
+                rojo += entrada[pos] * peso;
+                verde += entrada[pos + 1] * peso;
+                azul += entrada[pos + 2] * peso;
             }
         }
         
-        const normalize = (val) => {
+        const normalizar = (val) => {
             return Math.min(255, Math.max(0, val + 128));
         };
         
-        output[pixelPos] = normalize(red);
-        output[pixelPos + 1] = normalize(green);
-        output[pixelPos + 2] = normalize(blue);
-        output[pixelPos + 3] = 255;
+        salida[posicionPixel] = normalizar(rojo);
+        salida[posicionPixel + 1] = normalizar(verde);
+        salida[posicionPixel + 2] = normalizar(azul);
+        salida[posicionPixel + 3] = 255;
     }
     
-    function applySobelFilter(x, y, width, height, input, output, pixelPos) {
-        if (x === 0 || y === 0 || x === width - 1 || y === height - 1) {
+    function aplicarFiltroSobel(x, y, ancho, alto, entrada, salida, posicionPixel) {
+        if (x === 0 || y === 0 || x === ancho - 1 || y === alto - 1) {
             for (let i = 0; i < 4; i++) {
-                output[pixelPos + i] = input[pixelPos + i];
+                salida[posicionPixel + i] = entrada[posicionPixel + i];
             }
             return;
         }
@@ -394,27 +394,29 @@ document.addEventListener('DOMContentLoaded', function() {
         
         for (let ky = -1; ky <= 1; ky++) {
             for (let kx = -1; kx <= 1; kx++) {
-                const pos = ((y + ky) * width + (x + kx)) * 4;
-                const gray = (input[pos] + input[pos + 1] + input[pos + 2]) / 3;
+                const pos = ((y + ky) * ancho + (x + kx)) * 4;
+                const gris = (entrada[pos] + entrada[pos + 1] + entrada[pos + 2]) / 3;
                 
-                gx += gray * kernelX[ky + 1][kx + 1];
-                gy += gray * kernelY[ky + 1][kx + 1];
+                gx += gris * kernelX[ky + 1][kx + 1];
+                gy += gris * kernelY[ky + 1][kx + 1];
             }
         }
         
-        const magnitude = Math.sqrt(gx * gx + gy * gy);
-        const normalizedMagnitude = Math.min(255, Math.max(0, magnitude * 4));
+        const magnitud = Math.sqrt(gx * gx + gy * gy);
+        const magnitudNormalizada = Math.min(255, Math.max(0, magnitud * 4));
         
-        output[pixelPos] = normalizedMagnitude;
-        output[pixelPos + 1] = normalizedMagnitude;
-        output[pixelPos + 2] = normalizedMagnitude;
-        output[pixelPos + 3] = 255;
+        salida[posicionPixel] = magnitudNormalizada;
+        salida[posicionPixel + 1] = magnitudNormalizada;
+        salida[posicionPixel + 2] = magnitudNormalizada;
+        salida[posicionPixel + 3] = 255;
     }
     
-    document.querySelectorAll('.filters button').forEach(button => {
-        button.addEventListener('click', function() {
-            document.querySelectorAll('.filters button').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.filtros button').forEach(boton => {
+        boton.addEventListener('click', function() {
+            document.querySelectorAll('.filtros button').forEach(btn => btn.classList.remove('active'));
             this.classList.add('active');
+            const tipoFiltro = this.id.replace('filtro', '').toLowerCase();
+            manejarCambioTamanoKernel(tipoFiltro);
         });
     });
 });

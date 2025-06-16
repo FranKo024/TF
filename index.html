@@ -6,21 +6,21 @@
     <meta name="description" content="Aplicación de filtros de imagen usando procesamiento digital de imágenes">
     <title>Filtrado de Imágenes - Grupo 07</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Add Font Awesome for icons -->
+    <!-- Agregar Font Awesome para iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <div class="container">
+    <div class="contenedor">
         <header>
             <h1><i class="fas fa-image"></i> Filtrado de Imágenes</h1>
-            <div class="team-info">
+            <div class="info-grupo">
                 <h2>Grupo 07</h2>
-                <div class="team-members">
-                    <div class="member">
+                <div class="miembros-grupo">
+                    <div class="miembro">
                         <i class="fas fa-user"></i>
                         <span>Franco Laymito Delgado</span>
                     </div>
-                    <div class="member">
+                    <div class="miembro">
                         <i class="fas fa-user"></i>
                         <span>Ademir Gomez Bereche</span>
                     </div>
@@ -29,62 +29,62 @@
         </header>
 
         <main>
-            <section class="upload-section">
-                <div class="upload-content">
+            <section class="seccion-subida">
+                <div class="contenido-subida">
                     <i class="fas fa-image"></i>
                     <h3>Selecciona una imagen</h3>
-                    <label for="imageUpload" class="upload-button">
+                    <label for="subidaImagen" class="boton-subida">
                         <i class="fas fa-folder-open"></i>
                         Seleccionar archivo
-                        <input type="file" id="imageUpload" accept="image/*" hidden>
+                        <input type="file" id="subidaImagen" accept="image/*" hidden>
                     </label>
-                    <p class="file-info">Formatos soportados: JPG, PNG, GIF</p>
+                    <p class="info-archivo">Formatos soportados: JPG, PNG, GIF</p>
                 </div>
             </section>
             
-            <div class="image-container">
-                <div class="image-box">
+            <div class="contenedor-imagenes">
+                <div class="caja-imagen">
                     <h3><i class="fas fa-image"></i> Imagen Original</h3>
-                    <div class="canvas-container">
-                        <canvas id="originalCanvas"></canvas>
+                    <div class="contenedor-lienzo">
+                        <canvas id="lienzoOriginal"></canvas>
                     </div>
                 </div>
-                <div class="image-box">
+                <div class="caja-imagen">
                     <h3><i class="fas fa-magic"></i> Imagen Filtrada</h3>
-                    <div class="canvas-container">
-                        <canvas id="filteredCanvas"></canvas>
+                    <div class="contenedor-lienzo">
+                        <canvas id="lienzoFiltrado"></canvas>
                     </div>
                 </div>
             </div>
             
-            <section class="filters">
+            <section class="filtros">
                 <h2><i class="fas fa-sliders-h"></i> Filtros Disponibles</h2>
-                <div class="filter-buttons">
-                    <button id="medianFilter" class="filter-btn">
+                <div class="botones-filtro">
+                    <button id="filtroMediana" class="boton-filtro">
                         <i class="fas fa-wave-square"></i>
                         Filtro de Mediana
                     </button>
-                    <button id="meanFilter" class="filter-btn">
+                    <button id="filtroMedia" class="boton-filtro">
                         <i class="fas fa-calculator"></i>
                         Filtro de Media
                     </button>
-                    <button id="laplacianFilter" class="filter-btn">
+                    <button id="filtroLaplaciano" class="boton-filtro">
                         <i class="fas fa-border-all"></i>
                         Filtro Laplaciano
                     </button>
-                    <button id="sobelFilter" class="filter-btn">
+                    <button id="filtroSobel" class="boton-filtro">
                         <i class="fas fa-project-diagram"></i>
                         Filtro Sobel
                     </button>
                 </div>
                 
-                <div class="filter-options">
-                    <div class="option-group">
-                        <label for="kernelSize">
+                <div class="opciones-filtro">
+                    <div class="grupo-opcion">
+                        <label for="selectorTamanoKernel">
                             <i class="fas fa-th"></i>
                             Tamaño del Kernel:
                         </label>
-                        <select id="kernelSize">
+                        <select id="selectorTamanoKernel">
                             <option value="3">3x3</option>
                             <option value="5">5x5</option>
                             <option value="7">7x7</option>
@@ -92,12 +92,12 @@
                     </div>
                 </div>
 
-                <div class="action-buttons">
-                    <button id="resetBtn" class="reset-button">
+                <div class="botones-accion">
+                    <button id="botonReiniciar" class="boton-reiniciar">
                         <i class="fas fa-undo"></i>
                         Restablecer
                     </button>
-                    <button id="downloadBtn" class="download-button" disabled>
+                    <button id="botonDescargar" class="boton-descargar" disabled>
                         <i class="fas fa-download"></i>
                         Descargar Imagen
                     </button>
