@@ -8,13 +8,152 @@ document.addEventListener('DOMContentLoaded', function() {
     const downloadBtn = document.getElementById('downloadBtn');
     const kernelSizeSelect = document.getElementById('kernelSize');
     
+    // Add kernel image elements
+    const laplacianKernelImg = document.createElement('img');
+    laplacianKernelImg.src = 'images/laplacianKernel.png';
+    laplacianKernelImg.style.display = 'none';
+    laplacianKernelImg.style.maxWidth = '200px';
+    laplacianKernelImg.style.margin = '10px';
+    laplacianKernelImg.id = 'laplacianKernelImg';
+    
+    const sobelKernelImg = document.createElement('img');
+    sobelKernelImg.src = 'images/sobelKernel.png';
+    sobelKernelImg.style.display = 'none';
+    sobelKernelImg.style.maxWidth = '400px';
+    sobelKernelImg.style.margin = '10px';
+    sobelKernelImg.id = 'sobelKernelImg';
+    
+    // Add kernel size image elements
+    const kernelSizeImg = document.createElement('img');
+    kernelSizeImg.style.display = 'none';
+    kernelSizeImg.style.maxWidth = '300px';
+    kernelSizeImg.style.margin = '10px';
+    kernelSizeImg.id = 'kernelSizeImg';
+    
+    // Add kernel images to the document
+    document.querySelector('.filters').appendChild(laplacianKernelImg);
+    document.querySelector('.filters').appendChild(sobelKernelImg);
+    document.querySelector('.filters').appendChild(kernelSizeImg);
+    
     let originalImage = null;
     
     // Event listeners para los botones de filtros
-    document.getElementById('medianFilter').addEventListener('click', () => applyFilter('median'));
-    document.getElementById('meanFilter').addEventListener('click', () => applyFilter('mean'));
-    document.getElementById('laplacianFilter').addEventListener('click', () => applyFilter('laplacian'));
-    document.getElementById('sobelFilter').addEventListener('click', () => applyFilter('sobel'));
+    document.getElementById('medianFilter').addEventListener('click', () => {
+        hideAllKernelImages();
+        kernelSizeImg.style.display = 'block';
+        updateKernelSizeImage('median');
+        applyFilter('median');
+    });
+    document.getElementById('meanFilter').addEventListener('click', () => {
+        hideAllKernelImages();
+        kernelSizeImg.style.display = 'block';
+        updateKernelSizeImage('mean');
+        applyFilter('mean');
+    });
+    document.getElementById('laplacianFilter').addEventListener('click', () => {
+        hideAllKernelImages();
+        kernelSizeImg.style.display = 'block';
+        updateKernelSizeImage('laplacian');
+        applyFilter('laplacian');
+    });
+    document.getElementById('sobelFilter').addEventListener('click', () => {
+        hideAllKernelImages();
+        kernelSizeImg.style.display = 'block';
+        updateKernelSizeImage('sobel');
+        applyFilter('sobel');
+    });
+    
+    // Function to hide all kernel images
+    function hideAllKernelImages() {
+        laplacianKernelImg.style.display = 'none';
+        sobelKernelImg.style.display = 'none';
+        kernelSizeImg.style.display = 'none';
+        const existingContainer = document.querySelector('.sobel7x7-container');
+        if (existingContainer) {
+            existingContainer.remove();
+        }
+    }
+    
+    // Function to update kernel size image
+    function updateKernelSizeImage(filterType) {
+        const size = kernelSizeSelect.value;
+        if (filterType === 'sobel') {
+            // Always remove the 7x7 container if it exists
+            const existingContainer = document.querySelector('.sobel7x7-container');
+            if (existingContainer) {
+                existingContainer.remove();
+            }
+            if (size === '5') {
+                kernelSizeImg.style.display = 'block';
+                kernelSizeImg.src = 'images/sobel5x5.png';
+            } else if (size === '7') {
+                kernelSizeImg.style.display = 'none';
+                // For Sobel 7x7, show both X and Y kernels
+                const sobel7x7Container = document.createElement('div');
+                sobel7x7Container.style.display = 'flex';
+                sobel7x7Container.style.gap = '20px';
+                sobel7x7Container.style.justifyContent = 'center';
+                
+                const sobel7x7X = document.createElement('img');
+                sobel7x7X.src = 'images/sobel7x7_x.png';
+                sobel7x7X.style.maxWidth = '300px';
+                
+                const sobel7x7Y = document.createElement('img');
+                sobel7x7Y.src = 'images/sobel7x7_y.png';
+                sobel7x7Y.style.maxWidth = '300px';
+                
+                sobel7x7Container.className = 'sobel7x7-container';
+                sobel7x7Container.appendChild(sobel7x7X);
+                sobel7x7Container.appendChild(sobel7x7Y);
+                document.querySelector('.filters').appendChild(sobel7x7Container);
+            } else {
+                kernelSizeImg.style.display = 'block';
+                kernelSizeImg.src = 'images/sobelKernel.png';
+            }
+        } else if (filterType === 'laplacian') {
+            if (size === '5') {
+                kernelSizeImg.src = 'images/laplacian5x5.png';
+            } else if (size === '7') {
+                kernelSizeImg.src = 'images/laplacian7x7.png';
+            } else {
+                kernelSizeImg.src = 'images/laplacianKernel.png';
+            }
+            kernelSizeImg.style.display = 'block';
+        } else {
+            // For mean and median filters
+            const existingContainer = document.querySelector('.sobel7x7-container');
+            if (existingContainer) {
+                existingContainer.remove();
+            }
+            kernelSizeImg.style.display = 'block';
+            kernelSizeImg.src = `images/${size}x${size}kernel.png`;
+        }
+    }
+    
+    // Function to handle kernel size selection
+    function handleKernelSizeChange(filterType) {
+        if (filterType === 'laplacian') {
+            // Enable kernel size selection for Laplacian
+            kernelSizeSelect.disabled = false;
+            updateKernelSizeImage(filterType);
+        } else if (filterType === 'sobel') {
+            // Enable kernel size selection for Sobel
+            kernelSizeSelect.disabled = false;
+            updateKernelSizeImage(filterType);
+        } else {
+            // Enable kernel size selection for mean and median
+            kernelSizeSelect.disabled = false;
+            updateKernelSizeImage(filterType);
+        }
+    }
+    
+    // Event listener for kernel size changes
+    kernelSizeSelect.addEventListener('change', () => {
+        const activeFilter = document.querySelector('.filters button.active')?.id.replace('Filter', '');
+        if (activeFilter) {
+            updateKernelSizeImage(activeFilter);
+        }
+    });
     
     // Función para cargar y procesar la imagen
     function loadImage(file) {
@@ -280,4 +419,12 @@ document.addEventListener('DOMContentLoaded', function() {
         output[pixelPos + 2] = magnitude;
         output[pixelPos + 3] = 255; // Alpha
     }
+    
+    // Add click handler to remove active class from other buttons
+    document.querySelectorAll('.filters button').forEach(button => {
+        button.addEventListener('click', function() {
+            document.querySelectorAll('.filters button').forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
 });
